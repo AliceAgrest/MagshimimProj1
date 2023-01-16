@@ -20,6 +20,9 @@ void correctNhalfGuess (int creditCode, int guessCode);
 #define MAX_NUM 6
 #define MIN_NUM 1
 #define DIGIT_COUNT 4
+#define EASY_TRIES 20
+#define MEDIUM_TRIES 15
+#define HARD_TRIES 10
 
 int main(void) {
 	srand(time(NULL));
@@ -35,6 +38,7 @@ int main(void) {
 		char toContinue;
 		bool toContinue1 = true;
 
+        //loop of selected tries
 		for (; tries > 0; tries--){
 			if (option != ULTRA_HARD)
 				printf("You have %d tries\n", tries);
@@ -43,7 +47,8 @@ int main(void) {
 			guessCode = inRange(guessCode);
 			duplication = duplictesNumberCount(guessCode);
 			guessCode = anotherGuess(inRange(guessCode), duplication);
-
+            
+            //checks if user entered the right code before he ends all of his tries
 			if (creditCode == guessCode){
 				printf("You win!!! The credit code was %d\nCongratulations!\n", creditCode);
 				break;
@@ -54,12 +59,13 @@ int main(void) {
 				continue;
 			}
 		}
+		//when no trie left the func checks if the user won
 		if (creditCode == guessCode && tries == 0)
 			printf("You win!!!\nThe credit code was %d\nCongratulations!\n", creditCode);
 		else if (creditCode != guessCode)
 			printf("You lost :(\nThe credit Code was %d\nMaybe next time\n", creditCode);
 		
-		puts("Do you want go to another round?\ny - yes\nn - no");
+		puts("Do you want go to another round?\nPress any key to continue\nn - no");
 		scanf(" %c", &toContinue);
 		if (toContinue == 'n')
 			dontStop = false;
@@ -128,9 +134,9 @@ enum difficultLevel selectOptions (void){
 //returns the number of tries for each difficult
 int difficultyTries(enum difficultLevel difficulty) {
 	switch (difficulty){
-		case EASY: return 20;
-		case MEDIUM: return 15;
-		case HARD: return 10;
+		case EASY: return EASY_TRIES;
+		case MEDIUM: return MEDIUM_TRIES;
+		case HARD: return HARD_TRIES;
 		case ULTRA_HARD: return rand() % 21 + 5;
 	}
 }
@@ -205,6 +211,17 @@ bool duplictesNumberCount (int guessCode){
 	return duplication;
 }
 
+bool invalidInput (int guessCode){
+    bool stop = false;
+    for (int i = 1;i <= DIGIT_COUNT;guessCode /= 10 ,i++){
+        if (guessCode % 10 <= -1){
+            stop = true;
+            break;
+        }
+    }
+    return stop;
+}
+
 //if the input has duplicates the func asks for another input also check if the other iput is in range
 int anotherGuess (int guessCode, bool duplication){
 	while(duplication == true){
@@ -219,19 +236,18 @@ int anotherGuess (int guessCode, bool duplication){
 //correct guess means that you put the right number in right place
 //half guess means that you put the right number in wrong place
 void correctNhalfGuess (int creditCode, int guessCode){
-	int creditCopy = creditCode;
 	int guessCopy = guessCode;
 	int correctNumCount = 0;
 	int halfNumCount = 0;
 	
-	for (int i = 1; i <= DIGIT_COUNT; creditCopy /= 10, i++){
+	for (int i = 1; i <= DIGIT_COUNT; creditCode /= 10, i++){
 		guessCopy = guessCode;
 		for (int x = 1; x <= DIGIT_COUNT; guessCopy /= 10, x++){
-			if (i == x && creditCopy % 10 == guessCopy % 10){
+			if (i == x && creditCode % 10 == guessCopy % 10){
 				printf("Correct guess number %d\n", guessCopy % 10);
 				correctNumCount ++;
 			}
-			else if (creditCopy % 10 == guessCopy % 10){
+			else if (creditCode % 10 == guessCopy % 10){
 				printf ("Half guess number %d\n", guessCopy % 10);
 				halfNumCount ++;
 			}
