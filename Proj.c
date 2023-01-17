@@ -10,11 +10,12 @@ void theLion (void);
 int creditCodeRnd(void);
 enum difficultLevel selectOptions(void);
 int difficultyTries(enum difficultLevel difficulty);
-int inRange (int guessCode);
+bool inRange (int guessCode);
+void clear (void);
 bool doesDigitExist (int credit,int creditCode);
 int creditCodeRnd (void);
 bool duplictesNumberCount (int guessCode);
-int anotherGuess (int guessCode, bool duplication);
+int anotherGuess (int guessCode, bool duplication, bool range);
 void correctNhalfGuess (int creditCode, int guessCode);
 
 #define MAX_NUM 6
@@ -23,6 +24,8 @@ void correctNhalfGuess (int creditCode, int guessCode);
 #define EASY_TRIES 20
 #define MEDIUM_TRIES 15
 #define HARD_TRIES 10
+#define MAX_RAND_TRY 25
+#define MIN_RAND_TRY 5
 
 int main(void) {
 	srand(time(NULL));
@@ -34,32 +37,32 @@ int main(void) {
 		int option = selectOptions();
 		int tries = difficultyTries(option);
 		int guessCode;
+		bool range;
 		bool duplication = false;
 		char toContinue;
 		bool toContinue1 = true;
 
-        //loop of selected tries
+		//loop of selected tries
 		for (; tries > 0; tries--){
 			if (option != ULTRA_HARD)
 				printf("You have %d tries\n", tries);
 			puts("Enter a guess for the code: ");
-			scanf(" %d", &guessCode);
-			guessCode = inRange(guessCode);
+			scanf("%d", &guessCode);
+			clear();
+			range = inRange(guessCode);
 			duplication = duplictesNumberCount(guessCode);
-			guessCode = anotherGuess(inRange(guessCode), duplication);
-            
-            //checks if user entered the right code before he ends all of his tries
+			guessCode = anotherGuess(inRange(guessCode), duplication, range);
+
 			if (creditCode == guessCode){
 				printf("You win!!! The credit code was %d\nCongratulations!\n", creditCode);
 				break;
 			}
 			else{
-				if (option != ULTRA_HARD)
-					correctNhalfGuess(creditCode, guessCode);
+				correctNhalfGuess(creditCode, guessCode);
 				continue;
 			}
 		}
-		//when no trie left the func checks if the user won
+		//checks if user entered the right code before he ends all of his tries
 		if (creditCode == guessCode && tries == 0)
 			printf("You win!!!\nThe credit code was %d\nCongratulations!\n", creditCode);
 		else if (creditCode != guessCode)
@@ -94,40 +97,31 @@ void theLion (void){
 	puts("	, ;  ;`  ; ,; . / /8b \\ ; ;");
 	puts("	`; ; .;'         ;,\\8 |  ;  ;");
 	puts("	` ;/   / `_      ; ;;    ;  ; ;");
-    puts("	   |/.'  /9)    ;  ; `    ;  ; ;");
+	puts("	   |/.'  /9)    ;  ; `    ;  ; ;");
 	puts("	  ,/'          ; ; ;  ;   ; ; ; ;");
 	puts("	 /_            ;    ;  `    ;  ;");
 	puts("	`?8P\"  .      ;  ; ; ; ;     ;  ;;");
 	puts("	| ;  .:: `     ;; ; ;   `  ;  ;");
 	puts("	`' `--._      ;;  ;;  ; ;   ;   ;");
 	puts("	`-..__..--''   ; ;    ;;   ; ;   ;");
-    puts("			;    ; ; ;   ;     ;");
+	puts("			;    ; ; ;   ;     ;");
 }
 
 //you enter which level you want then it returns into the enum difficulty level
 enum difficultLevel selectOptions (void){
 	int option;
 	puts("Which level you want?");
-	puts("1 - Easy");
-	puts("2 - Medium");
-	puts("3 - Hard");
-	puts("4 - Very Hard");
-	
+	printf("%d - Easy\n", EASY);
+	printf("%d - Medium\n", MEDIUM);
+	printf("%d - Hard\n", HARD);
+	printf("%d - Very Hard\n", ULTRA_HARD);
+
 	while (true){
 		scanf("%d", &option);
-	
-		switch (option){
-			case 1:
-				return EASY;
-			case 2:
-				return MEDIUM;
-			case 3:
-				return HARD;
-			case 4:
-				return ULTRA_HARD;
-			default:
-				puts ("Invalid option!!!!!!!!!!!!!!\nTry again ");
-		}
+		if (option >= EASY && option <= ULTRA_HARD)
+			return option;
+		else
+			puts("Invalid input!!!!!!\nTry again");
 	}
 }
 
@@ -137,7 +131,7 @@ int difficultyTries(enum difficultLevel difficulty) {
 		case EASY: return EASY_TRIES;
 		case MEDIUM: return MEDIUM_TRIES;
 		case HARD: return HARD_TRIES;
-		case ULTRA_HARD: return rand() % 21 + 5;
+		case ULTRA_HARD: return rand() % (MAX_RAND_TRY - MIN_RAND_TRY + 1) + MIN_RAND_TRY;
 	}
 }
 
@@ -171,24 +165,36 @@ bool doesDigitExist (int credit,int creditCode){
 }
 
 //checks that the input is in range
-int inRange (int guessCode){
-	bool toContinue;
-	int inRange = 0; 
-	do {
+bool inRange (int guessCode){
+	bool was = false;
+	while (true) {
+		int inRange = 0; 
 		int guessCopy = guessCode;
 		for (int i = 1; i <= DIGIT_COUNT; guessCopy /= 10, i++){
 			if (guessCopy % 10 >= 1 && guessCopy % 10 <= 6)
 				inRange ++;
+			else if ((guessCopy % 10 >= 'a' && guessCopy <= 'z') || (guessCopy >= 'A' && guessCopy <= 'Z')){
+				printf("Invaild input!!!!!!!!!!Enter another guess: ");	
+				was = true;
+			}
 		}
-		if (inRange != DIGIT_COUNT){
-			puts("Invaild input!!!!!!!!!!\nEnter another guess: ");
-			scanf(" %d", &guessCode);
-			continue;
-		}
+		if (inRange != DIGIT_COUNT && was != true)
+			return false;
 		else 
+			return true;
+	}
+}
+
+//clears inputs buffer also check the input 
+void clear (void){
+	while(getchar() != '\n'){
+		if ((getchar() >= 'a' && getchar() <= 'z') || (getchar() >= 'A' && getchar() <= 'Z') || getchar() == 32){
+			for(;;)
+				printf("Invalid input!!!!!Enter another guess: ");
+		}
+		else
 			break;
-	} while (toContinue);
-	return guessCode;
+	}
 }
 
 //checks that there is no duplicate numbers in input
@@ -211,25 +217,17 @@ bool duplictesNumberCount (int guessCode){
 	return duplication;
 }
 
-bool invalidInput (int guessCode){
-    bool stop = false;
-    for (int i = 1;i <= DIGIT_COUNT;guessCode /= 10 ,i++){
-        if (guessCode % 10 <= -1){
-            stop = true;
-            break;
-        }
-    }
-    return stop;
-}
-
 //if the input has duplicates the func asks for another input also check if the other iput is in range
-int anotherGuess (int guessCode, bool duplication){
-	while(duplication == true){
+int anotherGuess (int guessCode, bool duplication, bool range){
+	while(true){
 		puts ("Invaild input!!!!!!!!!!\nEnter another guess code: ");
-		scanf(" %d", &guessCode);
+		scanf("%d", &guessCode);
+		clear();
+		range = inRange (guessCode);
 		duplication = duplictesNumberCount(guessCode);
+		if (duplication == false && range == true)
+			return guessCode;
 	}
-	return guessCode;
 }
 
 //checks the user guess code with genereted credit code
