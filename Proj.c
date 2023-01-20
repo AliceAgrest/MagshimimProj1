@@ -219,15 +219,17 @@ bool duplictesNumberCount (int guessCode){
 
 //if the input has duplicates the func asks for another input also check if the other iput is in range
 int anotherGuess (int guessCode, bool duplication, bool range){
-	while(true){
-		puts ("Invaild input!!!!!!!!!!\nEnter another guess code: ");
-		scanf("%d", &guessCode);
-		clear();
-		range = inRange (guessCode);
-		duplication = duplictesNumberCount(guessCode);
-		if (duplication == false && range == true)
-			return guessCode;
-	}
+    if (duplication == true || range == false){
+        while(true){
+            puts ("Invaild input!!!!!!!!!!\nEnter another guess code: ");
+            scanf("%d", &guessCode);
+            clear();
+            range = inRange (guessCode);
+            duplication = duplictesNumberCount(guessCode);
+            if (duplication == false && range == true)
+                return guessCode;
+        }
+    }
 }
 
 //checks the user guess code with genereted credit code
